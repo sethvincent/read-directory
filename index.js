@@ -10,6 +10,7 @@ function readDirectory (dir, options, callback) {
   }
 
   options = options || {}
+  var transform = options.transform
   var extensions = options.extensions === true
   var encoding = options.encoding || 'utf8'
   var filter = options.filter || '*.md'
@@ -34,7 +35,9 @@ function readDirectory (dir, options, callback) {
     var fullpath = path.join(dir, filepath)
     fs.readFile(fullpath, encoding, function (err, file) {
       if (err) return done(err)
-      if (!extensions) filepath = removeExtension(filepath)
+      var parsed = path.parse(filepath)
+      if (transform) file = transform(file, parsed)
+      if (!extensions) filepath = parsed.name
       contents[filepath] = file
       done()
     })
@@ -44,6 +47,7 @@ function readDirectory (dir, options, callback) {
 module.exports = module.exports.async = readDirectory
 module.exports.sync = function readDirectorySync (dir, options) {
   options = options || {}
+  var transform = options.transform
   var extensions = options.extensions === true
   var encoding = options.encoding || 'utf8'
   var filter = options.filter || '*.md'
@@ -53,13 +57,12 @@ module.exports.sync = function readDirectorySync (dir, options) {
 
   files.forEach(function (filepath, i) {
     var fullpath = path.join(dir, filepath)
-    if (!extensions) filepath = removeExtension(filepath)
-    contents[filepath] = fs.readFileSync(fullpath, encoding)
+    var parsed = path.parse(filepath)
+    var file = fs.readFileSync(fullpath, encoding)
+    if (transform) file = transform(file, parsed)
+    if (!extensions) filepath = parsed.name
+    contents[filepath] = file
   })
 
   return contents
-}
-
-function removeExtension (filename) {
-  return filename.replace(/\.[^/.]+$/, '')
 }
