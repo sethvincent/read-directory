@@ -7,7 +7,8 @@ test('read async', function (t) {
   read(path.join(__dirname, 'files'), function (err, contents) {
     t.notOk(err)
     t.ok(contents)
-    t.ok(typeof contents === 'object')
+    t.equal(typeof contents, 'object')
+    t.equal(Object.keys(contents).length, 3)
     t.end()
   })
 })
@@ -15,7 +16,8 @@ test('read async', function (t) {
 test('read sync', function (t) {
   var contents = read.sync(path.join(__dirname, 'files'))
   t.ok(contents)
-  t.ok(typeof contents === 'object')
+  t.equal(typeof contents, 'object')
+  t.equal(Object.keys(contents).length, 3)
   t.end()
 })
 

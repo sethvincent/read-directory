@@ -1,6 +1,7 @@
 var fs = require('fs')
 var path = require('path')
 var each = require('each-async')
+var glob = require('glob')
 
 function readDirectory (dir, options, callback) {
   if (typeof options === 'function') {
@@ -9,10 +10,13 @@ function readDirectory (dir, options, callback) {
   }
 
   options = options || {}
-  options.encoding = options.encoding || 'utf8'
+  var extensions = options.extensions === true
+  var encoding = options.encoding || 'utf8'
+  var filter = options.filter || '*.md'
+  var ignore = options.ignore
   var contents = {}
 
-  fs.readdir(dir, function (err, files) {
+  glob(filter, { cwd: dir, ignore: ignore }, function (err, files) {
     if (err) return callback(err)
     readAllFiles(files)
   })
@@ -28,8 +32,9 @@ function readDirectory (dir, options, callback) {
 
   function readFile (filepath, i, done) {
     var fullpath = path.join(dir, filepath)
-    fs.readFile(fullpath, options.encoding, function (err, file) {
+    fs.readFile(fullpath, encoding, function (err, file) {
       if (err) return done(err)
+      if (!extensions) filepath = removeExtension(filepath)
       contents[filepath] = file
       done()
     })
@@ -39,14 +44,22 @@ function readDirectory (dir, options, callback) {
 module.exports = module.exports.async = readDirectory
 module.exports.sync = function readDirectorySync (dir, options) {
   options = options || {}
-  options.encoding = options.encoding || 'utf8'
-  var files = fs.readdirSync(dir)
+  var extensions = options.extensions === true
+  var encoding = options.encoding || 'utf8'
+  var filter = options.filter || '*.md'
+  var ignore = options.ignore
+  var files = glob.sync(filter, { cwd: dir, ignore: ignore })
   var contents = {}
 
   files.forEach(function (filepath, i) {
     var fullpath = path.join(dir, filepath)
-    contents[filepath] = fs.readFileSync(fullpath, options.encoding)
+    if (!extensions) filepath = removeExtension(filepath)
+    contents[filepath] = fs.readFileSync(fullpath, encoding)
   })
 
   return contents
+}
+
+function removeExtension (filename) {
+  return filename.replace(/\.[^/.]+$/, '')
 }
