@@ -2,18 +2,46 @@ var fs = require('fs')
 var path = require('path')
 var each = require('each-async')
 var glob = require('glob')
+var defaults = require('defaults')
 
-function readDirectory (dir, options, callback) {
+var defaultOptions = {
+  encoding: 'utf8',
+  filter: '**/*',
+  extensions: false,
+  dirnames: false
+}
+
+/**
+* Read the contents of a directory asynchronously
+* @name readDirectory
+* @param {String} dir – The directory to read
+* @param {Object} options
+* @param {Boolean} options.extensions – include or exclude file extensions in keys of returned object
+* @param {Boolean} options.dirnames – include or exclude subdirectory names in keys of returned object
+* @param {String} options.encoding – encoding of files, default: utf8
+* @param {String} options.filter – glob pattern for filtering files, examples: `*.md`, `*.css`
+* @param {String} options.ignore – glob pattern for ignoring files
+* @param {Array} options.ignore – array of glob patterns for ignoring files
+* @param {Function} options.transform – A function you can use to transform the contents of files after they are read
+* @example
+* var read = require('read-directory')
+* read('./files', function (err, contents) {
+*   console.log(contents)
+* })
+**/
+module.exports = module.exports.async = function readDirectory (dir, options, callback) {
   if (typeof options === 'function') {
     callback = options
     options = {}
   }
 
-  options = options || {}
+  options = defaults(options, defaultOptions)
+
   var transform = options.transform
-  var extensions = options.extensions === true
-  var encoding = options.encoding || 'utf8'
-  var filter = options.filter || '*.md'
+  var extensions = options.extensions
+  var dirnames = options.dirnames
+  var encoding = options.encoding
+  var filter = options.filter
   var ignore = options.ignore
   var contents = {}
 
@@ -33,35 +61,65 @@ function readDirectory (dir, options, callback) {
 
   function readFile (filepath, i, done) {
     var fullpath = path.join(dir, filepath)
-    fs.readFile(fullpath, encoding, function (err, file) {
+    fs.stat(fullpath, function (err, stats) {
       if (err) return done(err)
-      var parsed = path.parse(filepath)
-      if (transform) file = transform(file, parsed)
-      if (!extensions) filepath = parsed.name
-      contents[filepath] = file
-      done()
+      if (stats.isFile()) {
+        fs.readFile(fullpath, encoding, function (err, file) {
+          if (err) return done(err)
+          var parsed = path.parse(filepath)
+          if (transform) file = transform(file, parsed)
+          if (!extensions) filepath = parsed.name
+          if (dirnames) filepath = parsed.dir.length ? parsed.dir + '/' + filepath : filepath
+          contents[filepath] = file
+          done()
+        })
+      } else {
+        done()
+      }
     })
   }
 }
 
-module.exports = module.exports.async = readDirectory
+/**
+* Read the contents of a directory asynchronously
+* @name readDirectory.sync
+* @param {String} dir – The directory to read
+* @param {Object} options
+* @param {Boolean} options.extensions – include or exclude file extensions in keys of returned object
+* @param {Boolean} options.dirnames – include or exclude subdirectory names in keys of returned object
+* @param {String} options.encoding – encoding of files, default: utf8
+* @param {String} options.filter – glob pattern for filtering files, examples: `*.md`, `*.css`
+* @param {String} options.ignore – glob pattern for ignoring files
+* @param {Array} options.ignore – array of glob patterns for ignoring files
+* @param {Function} options.transform – A function you can use to transform the contents of files after they are read
+* @example
+* var read = require('read-directory')
+* var contents = read.sync('./files')
+*/
 module.exports.sync = function readDirectorySync (dir, options) {
-  options = options || {}
+  options = defaults(options, defaultOptions)
+
   var transform = options.transform
-  var extensions = options.extensions === true
-  var encoding = options.encoding || 'utf8'
-  var filter = options.filter || '*.md'
+  var extensions = options.extensions
+  var dirnames = options.dirnames
+  var encoding = options.encoding
+  var filter = options.filter
   var ignore = options.ignore
+
   var files = glob.sync(filter, { cwd: dir, ignore: ignore })
   var contents = {}
 
   files.forEach(function (filepath, i) {
     var fullpath = path.join(dir, filepath)
     var parsed = path.parse(filepath)
-    var file = fs.readFileSync(fullpath, encoding)
-    if (transform) file = transform(file, parsed)
-    if (!extensions) filepath = parsed.name
-    contents[filepath] = file
+    var stats = fs.statSync(fullpath)
+    if (stats.isFile()) {
+      var file = fs.readFileSync(fullpath, encoding)
+      if (transform) file = transform(file, parsed)
+      if (!extensions) filepath = parsed.name
+      if (dirnames) filepath = parsed.dir.length ? parsed.dir + '/' + filepath : filepath
+      contents[filepath] = file
+    }
   })
 
   return contents
