@@ -16,6 +16,7 @@ var defaultOptions = {
 * @name readDirectory
 * @param {String} dir – The directory to read
 * @param {Object} options
+* @param {Object} options.fs – alternate fs implementation, optional
 * @param {Boolean} options.extensions – include or exclude file extensions in keys of returned object
 * @param {Boolean} options.dirnames – include or exclude subdirectory names in keys of returned object
 * @param {String} options.encoding – encoding of files, default: utf8
@@ -37,6 +38,7 @@ module.exports = module.exports.async = function readDirectory (dir, options, ca
 
   options = defaults(options, defaultOptions)
 
+  var xfs = options.fs || fs
   var transform = options.transform
   var extensions = options.extensions
   var dirnames = options.dirnames
@@ -61,21 +63,19 @@ module.exports = module.exports.async = function readDirectory (dir, options, ca
 
   function readFile (filepath, i, done) {
     var fullpath = path.join(dir, filepath)
-    fs.stat(fullpath, function (err, stats) {
+    xfs.stat(fullpath, function (err, stats) {
       if (err) return done(err)
-      if (stats.isFile()) {
-        fs.readFile(fullpath, encoding, function (err, file) {
-          if (err) return done(err)
-          var parsed = path.parse(filepath)
-          if (transform) file = transform(file, parsed)
-          if (!extensions) filepath = parsed.name
-          if (dirnames) filepath = parsed.dir.length ? parsed.dir + '/' + filepath : filepath
-          contents[filepath] = file
-          done()
-        })
-      } else {
+      if (!stats.isFile()) return done()
+
+      xfs.readFile(fullpath, encoding, function (err, file) {
+        if (err) return done(err)
+        var parsed = path.parse(filepath)
+        if (transform) file = transform(file, parsed)
+        if (!extensions) filepath = parsed.name
+        if (dirnames) filepath = parsed.dir.length ? parsed.dir + '/' + filepath : filepath
+        contents[filepath] = file
         done()
-      }
+      })
     })
   }
 }
@@ -85,6 +85,7 @@ module.exports = module.exports.async = function readDirectory (dir, options, ca
 * @name readDirectory.sync
 * @param {String} dir – The directory to read
 * @param {Object} options
+* @param {Object} options.fs – alternate fs implementation, optional
 * @param {Boolean} options.extensions – include or exclude file extensions in keys of returned object
 * @param {Boolean} options.dirnames – include or exclude subdirectory names in keys of returned object
 * @param {String} options.encoding – encoding of files, default: utf8
@@ -99,6 +100,7 @@ module.exports = module.exports.async = function readDirectory (dir, options, ca
 module.exports.sync = function readDirectorySync (dir, options) {
   options = defaults(options, defaultOptions)
 
+  var xfs = options.fs || fs
   var transform = options.transform
   var extensions = options.extensions
   var dirnames = options.dirnames
@@ -112,9 +114,10 @@ module.exports.sync = function readDirectorySync (dir, options) {
   files.forEach(function (filepath, i) {
     var fullpath = path.join(dir, filepath)
     var parsed = path.parse(filepath)
-    var stats = fs.statSync(fullpath)
+    var stats = xfs.statSync(fullpath)
+
     if (stats.isFile()) {
-      var file = fs.readFileSync(fullpath, encoding)
+      var file = xfs.readFileSync(fullpath, encoding)
       if (transform) file = transform(file, parsed)
       if (!extensions) filepath = parsed.name
       if (dirnames) filepath = parsed.dir.length ? parsed.dir + '/' + filepath : filepath

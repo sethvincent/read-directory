@@ -41,7 +41,6 @@ test('sync: filter out .txt', function (t) {
 
 test('async: include extensions', function (t) {
   read(path.join(__dirname, 'files'), { extensions: true }, function (err, contents) {
-    console.log(err, contents)
     t.notOk(err)
     t.ok(contents)
     t.equal(typeof contents, 'object')
@@ -73,9 +72,6 @@ test('async: exclude extensions', function (t) {
     t.equal(typeof contents, 'object')
     var keys = Object.keys(contents)
     t.equal(keys.length, 7)
-    keys.forEach(function (key) {
-      console.log(key.split('.'))
-    })
     t.end()
   })
 })
@@ -100,5 +96,22 @@ test('transform for the browser', function (t) {
     t.notOk(err)
     t.ok(buf)
     t.end()
+  })
+})
+
+test('alternate fs implementation', function (t) {
+  var mirror = require('mirror-folder')
+  var drive = require('hyperdrive')('./tmp/drive')
+  var dir = path.join(__dirname, 'files')
+  var progress = mirror(dir, { name: dir, fs: drive })
+
+  progress.on('end', function () {
+    read(dir, { fs: drive }, function (err, contents) {
+      t.notOk(err)
+      t.ok(contents)
+      t.equal(typeof contents, 'object')
+      t.equal(Object.keys(contents).length, 7)
+      t.end()
+    })
   })
 })
