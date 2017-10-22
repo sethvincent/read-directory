@@ -31,6 +31,12 @@ var defaultOptions = {
 * })
 **/
 module.exports = module.exports.async = function readDirectory (dir, options, callback) {
+  // browserify transform
+  if (typeof dir === 'string' && !/\n/.test(dir) && options && options._flags) {
+    var args = Array.prototype.slice.apply(arguments)
+    return require('./transform.js').apply(this, args)
+  }
+
   if (typeof options === 'function') {
     callback = options
     options = {}
