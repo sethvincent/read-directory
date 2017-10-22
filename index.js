@@ -7,7 +7,6 @@ var defaults = require('defaults')
 var defaultOptions = {
   encoding: 'utf8',
   filter: '**/*',
-  extensions: false,
   dirnames: false
 }
 
@@ -17,7 +16,6 @@ var defaultOptions = {
 * @param {String} dir – The directory to read
 * @param {Object} options
 * @param {Object} options.fs – alternate fs implementation, optional
-* @param {Boolean} options.extensions – include or exclude file extensions in keys of returned object
 * @param {Boolean} options.dirnames – include or exclude subdirectory names in keys of returned object
 * @param {String} options.encoding – encoding of files, default: utf8
 * @param {String} options.filter – glob pattern for filtering files, examples: `*.md`, `*.css`
@@ -46,7 +44,6 @@ module.exports = module.exports.async = function readDirectory (dir, options, ca
 
   var xfs = options.fs || fs
   var transform = options.transform
-  var extensions = options.extensions
   var dirnames = options.dirnames
   var encoding = options.encoding
   var filter = options.filter
@@ -77,7 +74,6 @@ module.exports = module.exports.async = function readDirectory (dir, options, ca
         if (err) return done(err)
         var parsed = path.parse(filepath)
         if (transform) file = transform(file, parsed)
-        if (!extensions) filepath = parsed.name
         if (dirnames) filepath = parsed.dir.length ? parsed.dir + '/' + filepath : filepath
         contents[filepath] = file
         done()
@@ -92,7 +88,6 @@ module.exports = module.exports.async = function readDirectory (dir, options, ca
 * @param {String} dir – The directory to read
 * @param {Object} options
 * @param {Object} options.fs – alternate fs implementation, optional
-* @param {Boolean} options.extensions – include or exclude file extensions in keys of returned object
 * @param {Boolean} options.dirnames – include or exclude subdirectory names in keys of returned object
 * @param {String} options.encoding – encoding of files, default: utf8
 * @param {String} options.filter – glob pattern for filtering files, examples: `*.md`, `*.css`
@@ -108,7 +103,6 @@ module.exports.sync = function readDirectorySync (dir, options) {
 
   var xfs = options.fs || fs
   var transform = options.transform
-  var extensions = options.extensions
   var dirnames = options.dirnames
   var encoding = options.encoding
   var filter = options.filter
@@ -125,7 +119,6 @@ module.exports.sync = function readDirectorySync (dir, options) {
     if (stats.isFile()) {
       var file = xfs.readFileSync(fullpath, encoding)
       if (transform) file = transform(file, parsed)
-      if (!extensions) filepath = parsed.name
       if (dirnames) filepath = parsed.dir.length ? parsed.dir + '/' + filepath : filepath
       contents[filepath] = file
     }

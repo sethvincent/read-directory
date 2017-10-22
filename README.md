@@ -65,7 +65,6 @@ Read the contents of a directory asynchronously
 -   `dir` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** – The directory to read
 -   `options` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** 
     -   `options.fs` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** – alternate fs implementation, optional
-    -   `options.extensions` **[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** – include or exclude file extensions in keys of returned object
     -   `options.dirnames` **[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** – include or exclude subdirectory names in keys of returned object
     -   `options.encoding` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** – encoding of files, default: utf8
     -   `options.filter` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** – glob pattern for filtering files, examples: `*.md`, `*.css`
@@ -91,7 +90,6 @@ Read the contents of a directory asynchronously
 -   `dir` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** – The directory to read
 -   `options` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** 
     -   `options.fs` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** – alternate fs implementation, optional
-    -   `options.extensions` **[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** – include or exclude file extensions in keys of returned object
     -   `options.dirnames` **[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** – include or exclude subdirectory names in keys of returned object
     -   `options.encoding` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** – encoding of files, default: utf8
     -   `options.filter` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** – glob pattern for filtering files, examples: `*.md`, `*.css`
