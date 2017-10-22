@@ -16,13 +16,35 @@ module.exports = function readDirectoryTransform (filename) {
     'read-directory': {
       sync: function (dir, options) {
         dir = path.isAbsolute(dir) ? dir : path.resolve(dir)
-        var stream = through()
-        stream.push(JSON.stringify(readDirectory.sync(dir, options)))
-        stream.push(null)
+
+        var stream = through(write, end)
+        var obj = readDirectory.sync(dir, options)
+        stream.push(JSON.stringify(obj))
+        stream.end()
+
         return stream
+
+        function write (buf, enc, next) {
+          this.push(buf)
+          next()
+        }
+
+        // Make sure all files are watched
+        function end (next) {
+          filenames(dir, obj).forEach(function (filename) {
+            sm.emit('file', filename)
+          })
+          next()
+        }
       }
     }
   }, { vars: vars, varModules: { path: path } })
 
   return sm
+}
+
+function filenames (base, obj) {
+  return Object.keys(obj).map(function (filename) {
+    return path.join(base, filename)
+  })
 }
