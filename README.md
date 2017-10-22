@@ -83,7 +83,7 @@ read('./files', function (err, contents) {
 
 ### readDirectory.sync
 
-Read the contents of a directory asynchronously
+Read the contents of a directory synchronously
 
 **Parameters**
 
