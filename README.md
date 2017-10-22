@@ -43,13 +43,13 @@ var contents = read.sync(path.join(__dirname, 'files'))
 ### Browserify example:
 
 ```bash
-browserify index.js -t read-directory/transform -o bundle.js 
+browserify index.js -t read-directory -o bundle.js
 ```
 
 ### budo example:
 
 ```bash
-budo index.js:bundle.js -- -t read-directory/transform
+budo index.js:bundle.js -- -t read-directory
 ```
 
 ## API
