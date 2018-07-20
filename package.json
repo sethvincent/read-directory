@@ -34,7 +34,7 @@
     "defaults": "^1.0.3",
     "each-async": "^1.1.1",
     "glob": "^7.1.2",
-    "static-module": "^1.3.2",
+    "static-module": "^3.0.0",
     "through2": "^2.0.3"
   }
 }
