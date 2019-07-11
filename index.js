@@ -74,7 +74,6 @@ module.exports = module.exports.async = function readDirectory (dir, options, ca
         if (err) return done(err)
         var parsed = path.parse(filepath)
         if (transform) file = transform(file, parsed)
-        if (transform) file = transform(file, parsed)
         filepath = parsed.name + parsed.ext
         if (dirnames) filepath = parsed.dir.length ? path.join(parsed.dir, filepath) : filepath
         contents[filepath] = file
