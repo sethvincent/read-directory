@@ -1,6 +1,6 @@
 {
   "name": "read-directory",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Read a directory of files",
   "main": "index.js",
   "directories": {
