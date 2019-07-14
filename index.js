@@ -74,7 +74,8 @@ module.exports = module.exports.async = function readDirectory (dir, options, ca
         if (err) return done(err)
         var parsed = path.parse(filepath)
         if (transform) file = transform(file, parsed)
-        if (dirnames) filepath = parsed.dir.length ? parsed.dir + '/' + filepath : filepath
+        filepath = parsed.name + parsed.ext
+        if (dirnames) filepath = parsed.dir.length ? path.join(parsed.dir, filepath) : filepath
         contents[filepath] = file
         done()
       })
@@ -119,7 +120,8 @@ module.exports.sync = function readDirectorySync (dir, options) {
     if (stats.isFile()) {
       var file = xfs.readFileSync(fullpath, encoding)
       if (transform) file = transform(file, parsed)
-      if (dirnames) filepath = parsed.dir.length ? parsed.dir + '/' + filepath : filepath
+      filepath = parsed.name + parsed.ext
+      if (dirnames) filepath = parsed.dir.length ? path.join(parsed.dir, filepath) : filepath
       contents[filepath] = file
     }
   })

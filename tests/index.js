@@ -40,7 +40,7 @@ test('sync: filter out .txt', function (t) {
 })
 
 test('async: include extensions', function (t) {
-  read(path.join(__dirname, 'files'), { extensions: true }, function (err, contents) {
+  read(path.join(__dirname, 'files'), function (err, contents) {
     t.notOk(err)
     t.ok(contents)
     t.equal(typeof contents, 'object')
@@ -54,7 +54,7 @@ test('async: include extensions', function (t) {
 })
 
 test('sync: include extensions', function (t) {
-  var contents = read.sync(path.join(__dirname, 'files'), { extensions: true })
+  var contents = read.sync(path.join(__dirname, 'files'))
   t.ok(contents)
   t.equal(typeof contents, 'object')
   var keys = Object.keys(contents)
@@ -65,26 +65,58 @@ test('sync: include extensions', function (t) {
   t.end()
 })
 
-test('async: exclude extensions', function (t) {
-  read(path.join(__dirname, 'files'), { extensions: true }, function (err, contents) {
+test('async: include dirnames', function (t) {
+  read(path.join(__dirname, 'files'), { dirnames: true }, function (err, contents) {
     t.notOk(err)
     t.ok(contents)
     t.equal(typeof contents, 'object')
     var keys = Object.keys(contents)
     t.equal(keys.length, 7)
+    var foundDirs = false
+    keys.forEach(function (key) {
+      if (key.split(path.sep).length > 1) foundDirs = true
+    })
+    t.ok(foundDirs)
     t.end()
   })
 })
 
-test('sync: exclude extensions', function (t) {
-  var contents = read.sync(path.join(__dirname, 'files'), { extensions: true })
+test('sync: include dirnames', function (t) {
+  var contents = read.sync(path.join(__dirname, 'files'), { dirnames: true })
   t.ok(contents)
   t.equal(typeof contents, 'object')
   var keys = Object.keys(contents)
-  t.equal(keys.length, 7)
+  var foundDirs = false
   keys.forEach(function (key) {
-    t.equal(key.split('.').length, 2)
+    if (key.split(path.sep).length > 1) foundDirs = true
   })
+  t.ok(foundDirs)
+  t.end()
+})
+
+test('async: exclude dirnames', function (t) {
+  read(path.join(__dirname, 'files'), { dirnames: false }, function (err, contents) {
+    t.notOk(err)
+    t.ok(contents)
+    t.equal(typeof contents, 'object')
+    var keys = Object.keys(contents)
+    keys.forEach(function (key) {
+      t.equal(key.split(path.sep).length, 1)
+    })
+    t.equal(keys.length, 7)
+    t.end()
+  })
+})
+
+test('sync: exclude dirnames', function (t) {
+  var contents = read.sync(path.join(__dirname, 'files'), { dirnames: false })
+  t.ok(contents)
+  t.equal(typeof contents, 'object')
+  var keys = Object.keys(contents)
+  keys.forEach(function (key) {
+    t.equal(key.split(path.sep).length, 1)
+  })
+  t.equal(keys.length, 7)
   t.end()
 })
 
